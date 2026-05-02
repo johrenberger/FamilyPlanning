@@ -17,9 +17,3 @@ services:
       - "traefik.http.services.crawdad.loadbalancer.server.port=8080"
     ports:
       - "8080:8080"
-    networks:
-      - familyplanning_default
-
-networks:
-  familyplanning_default:
-    external: true
