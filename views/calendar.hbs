@@ -1,0 +1,22 @@
+<div class="page-header">
+  <h1>📅 {{year}} Meal Calendar</h1>
+  <p class="subtitle">{{location.city}}, {{location.state}}</p>
+</div>
+
+<div class="year-view">
+  {{#each months}}
+    <div class="month-card">
+      <h2>{{name}}</h2>
+      <div class="month-grid">
+        {{#each days}}
+          <div class="day-cell {{#if meal}}has-meal{{/if}}" title="{{meal}} - {{chef}}">
+            <span class="day-num">{{date (substring date 8)}}</span>
+            {{#if meal}}
+              <span class="meal-name">{{substring meal 0 15}}</span>
+            {{/if}}
+          </div>
+        {{/each}}
+      </div>
+    </div>
+  {{/each}}
+</div>

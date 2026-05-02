@@ -1,0 +1,58 @@
+<div class="page-header">
+  <h1>🍽️ This Week's Meal Plan</h1>
+  <p class="subtitle">{{location.city}}, {{location.state}}</p>
+  <button id="refresh-weather" class="btn">🔄 Refresh Weather</button>
+</div>
+
+<div class="week-grid">
+  {{#each weekDays}}
+    <div class="day-card {{#if isToday}}today{{/if}}">
+      <div class="day-header">
+        <span class="day-name">{{dayOfWeek}}</span>
+        <span class="day-date">{{shortDate date}}</span>
+      </div>
+      
+      {{#if meal}}
+        <div class="meal-info">
+          <h3>{{meal}}</h3>
+          <p class="chef">👨‍🍳 {{chef}}</p>
+          
+          {{#if weather}}
+            <p class="weather">🌡️ {{weather.temp}} {{天气 weather.condition}}</p>
+            <p class="condition">{{weather.condition}}</p>
+            {{#if weather.goodForGrilling}}<span class="badge grill">🔥 Great for grilling!</span>{{/if}}
+            {{#if weather.goodForSoup}}<span class="badge soup">🍜 Soup weather</span>{{/if}}
+          {{else}}
+            <p class="weather no-weather">Weather pending...</p>
+          {{/if}}
+        </div>
+      {{else}}
+        <p class="no-meal">No meal planned</p>
+      {{/if}}
+    </div>
+  {{/each}}
+</div>
+
+<script>
+document.getElementById('refresh-weather').addEventListener('click', async () => {
+  const btn = document.getElementById('refresh-weather');
+  btn.textContent = '⏳ Updating...';
+  btn.disabled = true;
+  
+  try {
+    const res = await fetch('/api/weather');
+    const data = await res.json();
+    if (data.success) {
+      location.reload();
+    } else {
+      alert('Failed to update weather: ' + data.error);
+      btn.textContent = '🔄 Refresh Weather';
+      btn.disabled = false;
+    }
+  } catch (e) {
+    alert('Error: ' + e.message);
+    btn.textContent = '🔄 Refresh Weather';
+    btn.disabled = false;
+  }
+});
+</script>
