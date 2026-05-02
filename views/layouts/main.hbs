@@ -16,6 +16,12 @@
       <a href="/recipes" class="{{#if (eq title 'Recipe Book')}}active{{/if}}">Recipes</a>
       <a href="/weather" class="{{#if (eq title 'Weather Forecast')}}active{{/if}}">Weather</a>
     </div>
+    <div class="nav-actions">
+      <button id="btn-init" class="btn-nav" title="Generate full year meal plan, recipes, and shopping list">🚀 Generate All</button>
+      <button id="btn-daily" class="btn-nav" title="Generate today's meal">📅 Today</button>
+      <button id="btn-shopping" class="btn-nav" title="Generate shopping list for this week">🛒 Shopping</button>
+      <button id="btn-weather" class="btn-nav" title="Update weather forecast">🌤️ Weather</button>
+    </div>
   </nav>
   
   <main>
@@ -25,5 +31,68 @@
   <footer>
     <p>Crawdad Meal Planner • {{location.city}}, {{location.state}}</p>
   </footer>
+
+<script>
+// Navigation action buttons
+async function runAction(btn, url, reloadDelay = 2000) {
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.textContent = '⏳';
+  try {
+    const res = await fetch(url, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      btn.textContent = '✅';
+      setTimeout(() => location.reload(), reloadDelay);
+    } else {
+      alert('Error: ' + data.error);
+      btn.textContent = orig;
+      btn.disabled = false;
+    }
+  } catch (e) {
+    alert('Error: ' + e.message);
+    btn.textContent = orig;
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('btn-init')?.addEventListener('click', function() {
+  if (confirm('Generate full year meal plan, all recipes, and shopping list? This will overwrite existing data.')) {
+    runAction(this, '/api/init', 3000);
+  }
+});
+document.getElementById('btn-daily')?.addEventListener('click', function() {
+  runAction(this, '/api/daily');
+});
+document.getElementById('btn-shopping')?.addEventListener('click', function() {
+  runAction(this, '/api/shopping');
+});
+document.getElementById('btn-weather')?.addEventListener('click', function() {
+  runAction(this, '/api/plan/week');
+});
+
+// Existing weather refresh on home page
+document.getElementById('refresh-weather')?.addEventListener('click', async () => {
+  const btn = document.getElementById('refresh-weather');
+  btn.textContent = '⏳ Updating...';
+  btn.disabled = true;
+  
+  try {
+    const res = await fetch('/api/weather');
+    const data = await res.json();
+    if (data.success) {
+      location.reload();
+    } else {
+      alert('Failed to update weather: ' + data.error);
+      btn.textContent = '🔄 Refresh Weather';
+      btn.disabled = false;
+    }
+  } catch (e) {
+    alert('Error: ' + e.message);
+    btn.textContent = '🔄 Refresh Weather';
+    btn.disabled = false;
+  }
+});
+</script>
 </body>
 </html>

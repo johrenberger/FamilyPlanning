@@ -51,6 +51,33 @@ nav {
   color: white;
 }
 
+.nav-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+  padding-left: 15px;
+}
+
+.btn-nav {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.btn-nav:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+.btn-nav:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Main content */
 main { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
 
