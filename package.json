@@ -1,0 +1,18 @@
+{
+  "name": "Crawdad",
+  "version": "1.0.0",
+  "description": "Weekly meal planning system with weather-aware scheduling, smart shopping lists, and recipe management",
+  "main": "lib/crawdad.js",
+  "scripts": {
+    "start": "node lib/crawdad.js",
+    "daily": "node lib/crawdad.js --mode=daily",
+    "weather": "node lib/crawdad.js --mode=weather",
+    "shopping": "node lib/crawdad.js --mode=shopping",
+    "plan": "node lib/crawdad.js --mode=plan",
+    "digest": "node lib/crawdad.js --mode=digest",
+    "init": "node lib/crawdad.js --mode=init"
+  },
+  "keywords": ["meal-planning", "recipes", "shopping-list", "weather", "scheduler"],
+  "author": "Crawdad",
+  "license": "MIT"
+}
