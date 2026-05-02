@@ -1,0 +1,14 @@
+{
+  "location": {
+    "city": "St. Louis",
+    "state": "MO",
+    "zip": "63101"
+  },
+  "stores": [
+    { "name": "Schnucks", "aisles": ["Produce", "Deli", "Dairy", "Meat", "Bakery", "Frozen", "Pantry", "Beverages", "Snacks", "Cleaning"] },
+    { "name": "Costco", "aisles": ["Produce", "Deli", "Dairy", "Meat", "Bakery", "Frozen", "Pantry", "Electronics", "Home"] },
+    { "name": "Aldi", "aisles": ["Produce", "Deli", "Dairy", "Wine", "Frozen", "Pantry", "Snacks"] }
+  ],
+  "cooks": ["You", "Wife"],
+  "rotationWeeks": 2
+}
