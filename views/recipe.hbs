@@ -1,0 +1,62 @@
+<div class="recipe-detail">
+  <a href="/recipes" class="back-link">← Back to Recipes</a>
+  
+  <div class="recipe-header">
+    <span class="recipe-type">{{recipe.type}}</span>
+    <h1>{{recipe.name}}</h1>
+    <p class="chef">👨‍🍳 Chef: {{recipe.chef}}</p>
+  </div>
+  
+  <div class="recipe-meta-grid">
+    <div class="meta-item">
+      <span class="meta-label">Prep Time</span>
+      <span class="meta-value">{{recipe.prepTime}}</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Cook Time</span>
+      <span class="meta-value">{{recipe.cookTime}}</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Servings</span>
+      <span class="meta-value">{{recipe.servings}}</span>
+    </div>
+  </div>
+  
+  {{#if recipe.tags}}
+    <div class="tags">
+      {{#each recipe.tags}}
+        <span class="tag">{{this}}</span>
+      {{/each}}
+    </div>
+  {{/if}}
+  
+  <div class="recipe-section">
+    <h2>🥗 Ingredients</h2>
+    <ul class="ingredients-list">
+      {{#each recipe.ingredients}}
+        <li>{{this}}</li>
+      {{/each}}
+    </ul>
+  </div>
+  
+  <div class="recipe-section">
+    <h2>📝 Instructions</h2>
+    <p class="instructions">{{recipe.instructions}}</p>
+  </div>
+</div>
+
+<style>
+.recipe-detail { max-width: 700px; margin: 0 auto; }
+.back-link { color: #666; text-decoration: none; font-size: 0.9rem; }
+.back-link:hover { text-decoration: underline; }
+.recipe-header h1 { margin: 10px 0 5px; }
+.recipe-meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; }
+.meta-item { background: #f5f5f5; padding: 15px; border-radius: 8px; text-align: center; }
+.meta-label { display: block; color: #666; font-size: 0.8rem; text-transform: uppercase; }
+.meta-value { font-size: 1.1rem; font-weight: 600; }
+.recipe-section { margin: 25px 0; }
+.recipe-section h2 { margin-bottom: 10px; }
+.ingredients-list { columns: 2; column-gap: 30px; padding-left: 20px; }
+.ingredients-list li { margin-bottom: 5px; break-inside: avoid; }
+.instructions { line-height: 1.7; white-space: pre-wrap; }
+</style>

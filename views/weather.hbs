@@ -1,0 +1,22 @@
+<div class="page-header">
+  <h1>🌤️ Weather Forecast</h1>
+  <p class="subtitle">{{location.city}}, {{location.state}}</p>
+</div>
+
+<div class="forecast-grid">
+  {{#each forecast}}
+    <div class="forecast-card">
+      <div class="forecast-date">{{formatDate date}}</div>
+      <div class="forecast-temps">{{high}} / {{low}}</div>
+      <div class="forecast-condition">{{condition}}</div>
+      <div class="forecast-icons">
+        {{#if goodForGrilling}}<span class="icon-badge grill">🔥 Grill</span>{{/if}}
+        {{#if goodForSoup}}<span class="icon-badge soup">🍜 Soup</span>{{/if}}
+      </div>
+    </div>
+  {{/each}}
+</div>
+
+<div class="weather-tip">
+  <p>💡 <strong>Tip:</strong> Weather data from wttr.in — no API key needed. Updates when you refresh!</p>
+</div>

@@ -5,6 +5,7 @@
   "main": "lib/crawdad.js",
   "scripts": {
     "start": "node lib/crawdad.js",
+    "serve": "node lib/server.js",
     "daily": "node lib/crawdad.js --mode=daily",
     "weather": "node lib/crawdad.js --mode=weather",
     "shopping": "node lib/crawdad.js --mode=shopping",
@@ -12,7 +13,17 @@
     "digest": "node lib/crawdad.js --mode=digest",
     "init": "node lib/crawdad.js --mode=init"
   },
-  "keywords": ["meal-planning", "recipes", "shopping-list", "weather", "scheduler"],
+  "keywords": [
+    "meal-planning",
+    "recipes",
+    "shopping-list",
+    "weather",
+    "scheduler"
+  ],
   "author": "Crawdad",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.2.1",
+    "express-handlebars": "^9.0.1"
+  }
 }

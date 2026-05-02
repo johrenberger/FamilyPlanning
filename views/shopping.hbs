@@ -1,0 +1,54 @@
+<div class="page-header">
+  <h1>🛒 Shopping List</h1>
+  <p class="subtitle">Week of {{weekOf}}</p>
+</div>
+
+<div class="shopping-lists">
+  {{#each lists}}
+    <div class="store-section">
+      <h2>{{storeIcon store}} {{store}}</h2>
+      
+      {{#each aisles}}
+        {{#if this.length}}
+          <div class="aisle-section">
+            <h3>{{@key}}</h3>
+            <ul class="shopping-items">
+              {{#each this}}
+                <li class="item">
+                  <label>
+                    <input type="checkbox" class="item-checkbox">
+                    <span class="item-name">{{ingredient}}</span>
+                    <span class="item-qty">×{{quantity}}</span>
+                    <span class="item-meals">{{meals}}</span>
+                  </label>
+                </li>
+              {{/each}}
+            </ul>
+          </div>
+        {{/if}}
+      {{/each}}
+    </div>
+  {{/each}}
+</div>
+
+<style>
+.shopping-lists { max-width: 800px; margin: 0 auto; }
+.store-section { background: #f9f9f9; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+.store-section h2 { margin-top: 0; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+.aisle-section h3 { color: #666; font-size: 0.9rem; text-transform: uppercase; margin: 15px 0 10px; }
+.shopping-items { list-style: none; padding: 0; margin: 0; }
+.shopping-items li { padding: 8px 0; border-bottom: 1px solid #eee; }
+.shopping-items li:last-child { border-bottom: none; }
+.item-checkbox { margin-right: 10px; transform: scale(1.2); }
+.item-qty { color: #888; font-size: 0.85rem; margin-left: 5px; }
+.item-meals { display: block; color: #aaa; font-size: 0.75rem; margin-left: 25px; margin-top: 2px; }
+.item-name.checked { text-decoration: line-through; color: #aaa; }
+</style>
+
+<script>
+document.querySelectorAll('.item-checkbox').forEach(cb => {
+  cb.addEventListener('change', () => {
+    cb.closest('label').classList.toggle('checked', cb.checked);
+  });
+});
+</script>

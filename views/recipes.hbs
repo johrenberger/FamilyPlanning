@@ -1,0 +1,32 @@
+<div class="page-header">
+  <h1>📖 Recipe Book</h1>
+  <div class="filters">
+    <a href="/recipes" class="filter-btn {{#unless activeChef}}active{{/unless}}">All</a>
+    {{#each chefs}}
+      <a href="/recipes?chef={{this}}" class="filter-btn {{#if (eq ../activeChef this)}}active{{/if}}">{{this}}</a>
+    {{/each}}
+  </div>
+</div>
+
+{{#if recipes.length}}
+  <div class="recipe-grid">
+    {{#each recipes}}
+      <a href="/recipes/{{id}}" class="recipe-card">
+        <div class="recipe-type">{{type}}</div>
+        <h3>{{name}}</h3>
+        <p class="recipe-chef">👨‍🍳 {{chef}}</p>
+        <p class="recipe-meta">⏱️ {{prepTime}} prep • {{cookTime}} cook</p>
+        <p class="recipe-servings">🍽️ {{servings}} servings</p>
+        {{#if tags}}
+          <div class="tags">
+            {{#each tags}}
+              <span class="tag">{{this}}</span>
+            {{/each}}
+          </div>
+        {{/if}}
+      </a>
+    {{/each}}
+  </div>
+{{else}}
+  <p class="empty">No recipes found. Run <code>npm run init</code> to load default recipes.</p>
+{{/if}}
