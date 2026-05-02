@@ -10,7 +10,7 @@
       <div class="month-grid">
         {{#each days}}
           <div class="day-cell {{#if meal}}has-meal{{/if}}" title="{{meal}} - {{chef}}">
-            <span class="day-num">{{date (substring date 8)}}</span>
+            <span class="day-num">{{day}}</span>
             {{#if meal}}
               <span class="meal-name">{{substring meal 0 15}}</span>
             {{/if}}
