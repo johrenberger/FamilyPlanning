@@ -22,7 +22,7 @@ jobs:
         with:
           target: 'https://meal.clawdexter.tech'
           allow_issue_writing: false
-          cmd_options: '-r -j -l OFF'
+          cmd_options: '-r -j'
           artifact_name: 'zap-scan-report'
         env:
           HOME: '/tmp/zap-home'
