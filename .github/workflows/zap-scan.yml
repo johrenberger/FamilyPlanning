@@ -15,45 +15,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install ZAP
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install zap-baseline
-
       - name: Run ZAP baseline scan
-        run: |
-          zap-baseline.py -t https://meal.clawdexter.tech \
-            -J zap-report.json \
-            -r zap-report.html \
-            || true
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'https://meal.clawdexter.tech'
+          gen_report: true
+          fail_on_warnings: false
+          artifact_name: 'zap-report'
 
-      - name: Upload ZAP HTML report
+      - name: Upload ZAP report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: zap-report-html
-          path: zap-report.html
+          name: zap-report
+          path: zap_report.html
           retention-days: 30
-
-      - name: Upload ZAP JSON report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: zap-report-json
-          path: zap-report.json
-          retention-days: 30
-
-      - name: Comment on PR if vulnerabilities found
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          echo "ZAP scan completed. Reports available as artifacts."
-          if [ -f zap-report.json ]; then
-            COUNT=$(python3 -c "import json; d=json.load(open('zap-report.json')); print(len([s for s in d.get('site',[]) for s2 in s.get('alerts',[])]))")
-            echo "Total alerts: $COUNT"
-          fi
