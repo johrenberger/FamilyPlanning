@@ -24,9 +24,9 @@ jobs:
         with:
           target: 'https://meal.clawdexter.tech'
           allow_issue_writing: false
-          cmd_options: '-r -j -l OFF'
-          artifact_name: 'zap-scan-report'
-        id: zap
+          cmd_options: '-r -j -l OFF -N /tmp/zap-home'
+        env:
+          HOME: '/tmp/zap-home'
 
       - name: Download and display ZAP report
         uses: actions/download-artifact@v4
