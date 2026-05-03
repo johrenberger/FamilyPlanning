@@ -17,15 +17,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Prep ZAP home directory
+        run: |
+          mkdir -p /tmp/zap-home
+          chmod 777 /tmp/zap-home
+          # Pre-create the workspace zap dir so container root can write to it
+          mkdir -p $GITHUB_WORKSPACE/zapwrk
+          chmod 777 $GITHUB_WORKSPACE/zapwrk
+
       - name: Run ZAP baseline scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: 'https://meal.clawdexter.tech'
           allow_issue_writing: false
-          cmd_options: '-r -j -u root'
+          cmd_options: '-r -j'
           artifact_name: 'zap_scan_report'
         env:
           HOME: '/tmp/zap-home'
+          ZAP_HOME: '/tmp/zap-home'
 
       - name: Download ZAP report artifact
         uses: actions/download-artifact@v4
