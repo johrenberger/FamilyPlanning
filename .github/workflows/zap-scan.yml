@@ -24,35 +24,55 @@ jobs:
         with:
           target: 'https://meal.clawdexter.tech'
           allow_issue_writing: false
-          cmd_options: '-r -j -u root'
+          cmd_options: '-r -j -l OFF'
           artifact_name: 'zap-scan-report'
         id: zap
 
-      - name: Download ZAP report artifact
+      - name: Download and display ZAP report
         uses: actions/download-artifact@v4
         with:
           name: zap-scan-report
           path: ./zap-reports
 
-      - name: List report files
+      - name: Analyze ZAP report
         run: |
-          echo "=== Report files ==="
-          ls -la zap-reports/ 2>/dev/null || echo "No reports found"
-          echo ""
-          echo "=== JSON summary ==="
+          echo "=== ZAP Report Summary ==="
           if [ -f zap-reports/zap_report.json ]; then
-            python3 -c "
-import json
+            python3 << 'PYEOF'
+import json, sys
+
 with open('zap-reports/zap_report.json') as f:
     data = json.load(f)
+
 sites = data.get('site', [])
-total_alerts = sum(len(s.get('alerts', [])) for s in sites)
-print(f'Sites scanned: {len(sites)}')
-print(f'Total alerts: {total_alerts}')
-for s in sites:
-    for a in s.get('alerts', []):
-        print(f\"  [{a['risk']}] {a['name']} — {a['desc'][:80]}\")
-" 2>/dev/null || echo "JSON parse failed"
+print(f"Sites scanned: {len(sites)}\n")
+
+for site in sites:
+    alerts = site.get('alerts', [])
+    if not alerts:
+        print(f"Site: {site.get('name', 'unknown')} — 0 alerts ✅")
+        continue
+
+    risk_counts = {'High': 0, 'Medium': 0, 'Low': 0, 'Informational': 0}
+    for a in alerts:
+        risk = a.get('risk', 'Unknown')
+        risk_counts[risk] = risk_counts.get(risk, 0) + 1
+
+    print(f"Site: {site.get('name')} — {len(alerts)} alerts:")
+    for risk, count in sorted(risk_counts.items(), key=lambda x: ['High','Medium','Low','Informational'].index(x[0])):
+        if count:
+            print(f"  {risk}: {count}")
+
+    print("\n  Top findings:")
+    for a in sorted(alerts, key=lambda x: ['High','Medium','Low','Informational'].index(x.get('risk','Low')))[:5]:
+        print(f"  [{a['risk']}] {a['name']}")
+        print(f"    URL: {a.get('url', 'N/A')}")
+        desc = a.get('desc', '')[:200].replace('\n', ' ')
+        print(f"    {desc}...")
+        print()
+PYEOF
           else
-            echo "zap_report.json not found"
+            echo "No zap_report.json found in artifact"
+            echo "Available files:"
+            ls -la zap-reports/ 2>/dev/null || echo "Directory empty or not found"
           fi
