@@ -7,6 +7,10 @@ on:
   workflow_dispatch:
     # Allow manual trigger any time
 
+permissions:
+  issues: write  # needed for ZAP issue writing feature
+  contents: read
+
 jobs:
   zap-scan:
     name: ZAP Baseline Scan
@@ -19,14 +23,14 @@ jobs:
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: 'https://meal.clawdexter.tech'
-          gen_report: true
-          fail_on_warnings: false
+          allow_issue_writing: false
           artifact_name: 'zap-report'
+          cmd_options: '-r -j'  # -r = HTML report, -j = JSON report (saved to zap_report.json)
 
-      - name: Upload ZAP report
+      - name: Upload ZAP JSON report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: zap-report
-          path: zap_report.html
+          name: zap-report-json
+          path: zap_report.json
           retention-days: 30
