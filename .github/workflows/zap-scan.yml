@@ -20,19 +20,18 @@ jobs:
       - name: Run ZAP baseline scan
         run: |
           WORKSPACE="$GITHUB_WORKSPACE"
-          chmod -R 777 "$WORKSPACE"
-
+          # GitHub Actions uses user namespaces — container root (UID 0) maps to unprivileged host user.
+          # Use runner UID so bind-mounted workspace is writable (workspace is owned by host runner).
           docker pull ghcr.io/zaproxy/zaproxy:stable -q
           docker run \
             --rm \
             -v "$WORKSPACE:/zap/wrk:rw" \
             --network="host" \
-            --user "zap:zap" \
             -e HOME=/zap/wrk \
             -e ZAP_AUTH_HEADER \
             -e ZAP_AUTH_HEADER_VALUE \
             -e ZAP_AUTH_HEADER_SITE \
-            ghcr.io/zaproxy/zaproxy:stable \
+            --user "$(id -u):$(id -g)" \
             zap-baseline.py \
               -t https://meal.clawdexter.tech \
               -J /zap/wrk/zap_report.json \
