@@ -19,11 +19,13 @@ jobs:
 
       - name: Run ZAP baseline scan
         run: |
-          chmod -R 777 "$GITHUB_WORKSPACE"
+          WORKSPACE="$GITHUB_WORKSPACE"
+          chmod -R 777 "$WORKSPACE"
+          mkdir -p "$WORKSPACE/zap_reports"
           docker pull ghcr.io/zaproxy/zaproxy:stable -q
           docker run \
             --rm \
-            -v "$GITHUB_WORKSPACE:/zap/wrk:rw" \
+            -v "$WORKSPACE:/zap/wrk:rw" \
             --network="host" \
             --user "zap:zap" \
             -e HOME=/zap/wrk \
@@ -33,16 +35,24 @@ jobs:
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
               -t https://meal.clawdexter.tech \
-              -J /zap/wrk/zap_report.json \
-              -w /zap/wrk/zap_report.md \
-              -r /zap/wrk/zap_report.html
+              -J /zap/wrk/zap_reports/zap_report.json \
+              -w /zap/wrk/zap_reports/zap_report.md \
+              -r /zap/wrk/zap_reports/zap_report.html
+          # Verify reports were generated
+          echo "=== Verifying ZAP report output ==="
+          ls -la "$WORKSPACE/zap_reports/"
+          if [ ! -f "$WORKSPACE/zap_reports/zap_report.json" ]; then
+            echo "Error: zap_report.json was not created"
+            exit 1
+          fi
+          echo "ZAP scan completed successfully"
 
       - name: Write analysis script
         run: |
           cat > /tmp/analyze_zap.py << 'SCRIPT'
           import json, sys
           try:
-              with open('zap_report.json') as f:
+              with open('zap_reports/zap_report.json') as f:
                   data = json.load(f)
               sites = data.get('site', [])
               print('Sites scanned:', len(sites))
