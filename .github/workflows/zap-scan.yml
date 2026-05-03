@@ -32,7 +32,7 @@ jobs:
             --rm \
             -v "$WORKSPACE:/zap/wrk:rw" \
             --network="host" \
-            --user "$(id -u):$(id -g)" \
+            -u root:root \
             -e HOME=/zap/wrk \
             -e ZAP_AUTH_HEADER \
             -e ZAP_AUTH_HEADER_VALUE \
@@ -50,6 +50,7 @@ jobs:
 
           if [ ! -f "$WORKSPACE/zap_report.json" ]; then
             echo "Error: zap_report.json was not created"
+            ls -la "$WORKSPACE"
             exit 1
           fi
           echo "ZAP scan completed successfully"
