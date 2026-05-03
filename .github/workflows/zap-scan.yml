@@ -19,23 +19,23 @@ jobs:
 
       - name: Run ZAP baseline scan
         run: |
-          # Make workspace world-writable so zap user (UID 1000) can write reports
           chmod -R 777 "$GITHUB_WORKSPACE"
           docker pull ghcr.io/zaproxy/zaproxy:stable -q
           docker run \
-            -v "$GITHUB_WORKSPACE:/zap/wrk/:rw" \
+            --rm \
+            -v "$GITHUB_WORKSPACE:/zap/wrk:rw" \
             --network="host" \
             --user "zap:zap" \
             -e HOME=/zap/wrk \
             -e ZAP_AUTH_HEADER \
             -e ZAP_AUTH_HEADER_VALUE \
             -e ZAP_AUTH_HEADER_SITE \
-            -t ghcr.io/zaproxy/zaproxy:stable \
+            ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
               -t https://meal.clawdexter.tech \
-              -J "$GITHUB_WORKSPACE/zap_report.json" \
-              -w "$GITHUB_WORKSPACE/zap_report.md" \
-              -r "$GITHUB_WORKSPACE/zap_report.html"
+              -J /zap/wrk/zap_report.json \
+              -w /zap/wrk/zap_report.md \
+              -r /zap/wrk/zap_report.html
 
       - name: Write analysis script
         run: |
