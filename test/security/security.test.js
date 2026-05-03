@@ -70,7 +70,8 @@ describe('Security Tests', () => {
       const res = await request(app)
         .post('/api/init')
         .send({});
-      expect(res.status).to.be.oneOf([200, 400, 500]);
+      // Rate limiting may trigger 429; accept it since security.test.js runs after pen.test.js
+expect(res.status).to.be.oneOf([200, 400, 429, 500]);
     });
 
     it('should not expose stack traces in production', async () => {
@@ -86,7 +87,8 @@ describe('Security Tests', () => {
     it('should not leak sensitive information in headers', async () => {
       const res = await request(app).get('/');
       // Should not have debug headers in production
-      expect(res.headers['x-powered-by']).to.equal('Express'); // Express default, disable in prod
+      // helmet() removes x-powered-by - this is the secure default
+expect(res.headers['x-powered-by']).to.be.undefined;
     });
   });
 
