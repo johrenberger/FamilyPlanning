@@ -8,7 +8,7 @@ on:
     # Allow manual trigger any time
 
 permissions:
-  issues: write  # needed for ZAP issue writing feature
+  issues: write
   contents: read
 
 jobs:
@@ -24,13 +24,35 @@ jobs:
         with:
           target: 'https://meal.clawdexter.tech'
           allow_issue_writing: false
-          artifact_name: 'zap-report'
-          cmd_options: '-r -j'  # -r = HTML report, -j = JSON report (saved to zap_report.json)
+          cmd_options: '-r -j -u root'
+          artifact_name: 'zap-scan-report'
+        id: zap
 
-      - name: Upload ZAP JSON report
-        uses: actions/upload-artifact@v4
-        if: always()
+      - name: Download ZAP report artifact
+        uses: actions/download-artifact@v4
         with:
-          name: zap-report-json
-          path: zap_report.json
-          retention-days: 30
+          name: zap-scan-report
+          path: ./zap-reports
+
+      - name: List report files
+        run: |
+          echo "=== Report files ==="
+          ls -la zap-reports/ 2>/dev/null || echo "No reports found"
+          echo ""
+          echo "=== JSON summary ==="
+          if [ -f zap-reports/zap_report.json ]; then
+            python3 -c "
+import json
+with open('zap-reports/zap_report.json') as f:
+    data = json.load(f)
+sites = data.get('site', [])
+total_alerts = sum(len(s.get('alerts', [])) for s in sites)
+print(f'Sites scanned: {len(sites)}')
+print(f'Total alerts: {total_alerts}')
+for s in sites:
+    for a in s.get('alerts', []):
+        print(f\"  [{a['risk']}] {a['name']} — {a['desc'][:80]}\")
+" 2>/dev/null || echo "JSON parse failed"
+          else
+            echo "zap_report.json not found"
+          fi
