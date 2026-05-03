@@ -167,7 +167,7 @@ jobs:
             crawdad:${{ github.sha }}
 
       - name: Wait for container startup
-        run: sleep 8
+        run: sleep 15
 
       - name: Health check
         run: |
