@@ -5,16 +5,23 @@
  * This is in a separate file because supertest shares the Express app across
  * all describe() blocks, and the rate limiter's IP counter persists across tests.
  *
+ * CRITICAL: We must bust the require cache so server.js re-reads DISABLE_RATE_LIMIT
+ * from the CURRENT value (false), not the value that was set when pen.test.js first
+ * loaded the module (true). Node.js caches module exports at require() time.
+ *
  * Based on PEN_TESTING.md Phase 2 findings (2026-05-03)
  */
 
 process.env.DISABLE_RATE_LIMIT = 'false';
 
+// Bust the require cache so server.js re-evaluates DISABLE_RATE_LIMIT
+const serverPath = require.resolve('../../lib/server');
+delete require.cache[serverPath];
+
 const chai = require('chai');
 const expect = chai.expect;
 const http = require('http');
 
-// Start a fresh server just for rate limit tests
 const app = require('../../lib/server');
 
 let server;
@@ -35,14 +42,12 @@ describe('F02 — Rate Limiting on API Endpoints', () => {
   it('should return 429 after 100 requests to /api in a 15-minute window', function (done) {
     this.timeout(20000);
     let count429 = 0;
-    let count200 = 0;
     let remaining = 110;
     const checks = [];
 
     for (let i = 0; i < 110; i++) {
       http.get(`${baseUrl}/api/weather`, (res) => {
         if (res.statusCode === 429) count429++;
-        else if (res.statusCode === 200) count200++;
         checks.push(res.statusCode);
         if (checks.length === remaining) {
           expect(count429).to.be.greaterThan(0);
