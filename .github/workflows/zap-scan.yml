@@ -1,0 +1,59 @@
+name: Weekly ZAP Security Scan
+
+on:
+  schedule:
+    # Run every Sunday at 20:00 UTC
+    - cron: '0 20 * * 0'
+  workflow_dispatch:
+    # Allow manual trigger any time
+
+jobs:
+  zap-scan:
+    name: ZAP Baseline Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install ZAP
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install zap-baseline
+
+      - name: Run ZAP baseline scan
+        run: |
+          zap-baseline.py -t https://meal.clawdexter.tech \
+            -J zap-report.json \
+            -r zap-report.html \
+            || true
+
+      - name: Upload ZAP HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zap-report-html
+          path: zap-report.html
+          retention-days: 30
+
+      - name: Upload ZAP JSON report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zap-report-json
+          path: zap-report.json
+          retention-days: 30
+
+      - name: Comment on PR if vulnerabilities found
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "ZAP scan completed. Reports available as artifacts."
+          if [ -f zap-report.json ]; then
+            COUNT=$(python3 -c "import json; d=json.load(open('zap-report.json')); print(len([s for s in d.get('site',[]) for s2 in s.get('alerts',[])]))")
+            echo "Total alerts: $COUNT"
+          fi
