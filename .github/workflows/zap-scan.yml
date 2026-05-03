@@ -40,7 +40,7 @@ jobs:
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
               -t https://meal.clawdexter.tech \
-              --timeout 120 \
+              -I \
               -J /zap/wrk/zap_report.json \
               -w /zap/wrk/zap_report.md \
               -r /zap/wrk/zap_report.html
