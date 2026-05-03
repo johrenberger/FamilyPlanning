@@ -19,11 +19,8 @@ jobs:
 
       - name: Run ZAP baseline scan
         run: |
-          # Get runner's UID/GID
           RUNNER_UID=$(id -u)
           RUNNER_GID=$(id -g)
-          
-          # Pull image and run as runner's UID so bind-mounted workspace is writable
           docker pull ghcr.io/zaproxy/zaproxy:stable -q
           docker run \
             -v "$GITHUB_WORKSPACE:/zap/wrk/:rw" \
@@ -40,28 +37,30 @@ jobs:
               -w "$GITHUB_WORKSPACE/zap_report.md" \
               -r "$GITHUB_WORKSPACE/zap_report.html"
 
-      - name: Display ZAP report summary
+      - name: Write analysis script
         run: |
-          echo "=== ZAP Report Summary ==="
-          if [ -f zap_report.json ]; then
-            python3 << 'PYEOF'
-import json
-with open('zap_report.json') as f:
-    data = json.load(f)
-sites = data.get('site', [])
-print(f"Sites scanned: {len(sites)}")
-total = 0
-for site in sites:
-    name = site.get('name', 'unknown')
-    alerts = site.get('alerts', [])
-    total += len(alerts)
-    print(f"Site: {name} - {len(alerts)} alerts")
-    for a in alerts[:5]:
-        print(f"  [{a.get('risk','?')}] {a.get('name','')}")
-    if len(alerts) > 5:
-        print(f"  ... and {len(alerts)-5} more")
-print(f"Total alerts: {total}")
-PYEOF
-          else
-            echo "No zap_report.json found"
-          fi
+          cat > /tmp/analyze_zap.py << 'SCRIPT'
+          import json, sys
+          try:
+              with open('zap_report.json') as f:
+                  data = json.load(f)
+              sites = data.get('site', [])
+              print('Sites scanned:', len(sites))
+              total = 0
+              for site in sites:
+                  name = site.get('name', 'unknown')
+                  alerts = site.get('alerts', [])
+                  total += len(alerts)
+                  print('Site: ' + name + ' - ' + str(len(alerts)) + ' alerts')
+                  for a in alerts[:5]:
+                      print('  [' + a.get('risk', '?') + '] ' + a.get('name', ''))
+                  if len(alerts) > 5:
+                      print('  ... and ' + str(len(alerts)-5) + ' more')
+              print('Total alerts: ' + str(total))
+          except Exception as e:
+              print('Error: ' + str(e))
+              sys.exit(1)
+          SCRIPT
+
+      - name: Analyze ZAP report
+        run: python3 /tmp/analyze_zap.py
