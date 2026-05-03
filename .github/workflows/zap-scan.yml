@@ -17,23 +17,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Check URL is accessible
+        run: |
+          echo "Checking connectivity to meal.clawdexter.tech..."
+          curl -Ifs --max-time 30 https://meal.clawdexter.tech || echo "Warning: could not reach target (continuing anyway)"
+
       - name: Run ZAP baseline scan
         run: |
           WORKSPACE="$GITHUB_WORKSPACE"
-          # GitHub Actions uses user namespaces — container root (UID 0) maps to unprivileged host user.
-          # Use runner UID so bind-mounted workspace is writable (workspace is owned by host runner).
+          chmod -R 777 "$WORKSPACE"
+
           docker pull ghcr.io/zaproxy/zaproxy:stable -q
           docker run \
             --rm \
             -v "$WORKSPACE:/zap/wrk:rw" \
             --network="host" \
+            --user "$(id -u):$(id -g)" \
             -e HOME=/zap/wrk \
             -e ZAP_AUTH_HEADER \
             -e ZAP_AUTH_HEADER_VALUE \
             -e ZAP_AUTH_HEADER_SITE \
-            --user "$(id -u):$(id -g)" \
+            ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
               -t https://meal.clawdexter.tech \
+              --timeout 120 \
               -J /zap/wrk/zap_report.json \
               -w /zap/wrk/zap_report.md \
               -r /zap/wrk/zap_report.html
