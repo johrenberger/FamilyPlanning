@@ -38,15 +38,10 @@ jobs:
             -e ZAP_AUTH_HEADER_VALUE \
             -e ZAP_AUTH_HEADER_SITE \
             ghcr.io/zaproxy/zaproxy:stable \
-            zap-baseline.py \
-              -t https://meal.clawdexter.tech \
-              -I \
-              -J /zap/wrk/zap_report.json \
-              -w /zap/wrk/zap_report.md \
-              -r /zap/wrk/zap_report.html
+            bash -c "set -x && cd /zap/wrk && zap-baseline.py -t https://meal.clawdexter.tech -I -J zap_report.json -w zap_report.md -r zap_report.html"
 
           echo "=== ZAP report output ==="
-          ls -la "$WORKSPACE/zap_report"* 2>/dev/null || echo "No reports found"
+          ls -la "$WORKSPACE"/zap_report* 2>/dev/null || echo "No reports found"
 
           if [ ! -f "$WORKSPACE/zap_report.json" ]; then
             echo "Error: zap_report.json was not created"
