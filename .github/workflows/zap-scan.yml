@@ -23,14 +23,14 @@ jobs:
           target: 'https://meal.clawdexter.tech'
           allow_issue_writing: false
           cmd_options: '-r -j'
-          artifact_name: 'zap-scan-report'
+          artifact_name: 'zap_scan_report'
         env:
           HOME: '/tmp/zap-home'
 
       - name: Download ZAP report artifact
         uses: actions/download-artifact@v4
         with:
-          name: zap-scan-report
+          name: zap_scan_report
           path: ./zap-reports
 
       - name: Write analysis script
