@@ -171,7 +171,14 @@ jobs:
 
       - name: Health check
         run: |
-          docker inspect crawdad-test-${{ github.sha }} --format='{{.State.Running}}'
+          CONTAINER_RUNNING=$(docker inspect crawdad-test-${{ github.sha }} --format='{{.State.Running}}')
+          echo "Container running: $CONTAINER_RUNNING"
+          if [ "$CONTAINER_RUNNING" != "true" ]; then
+            echo "Container not running. Showing logs:"
+            docker logs crawdad-test-${{ github.sha }} 2>&1 || true
+            docker inspect crawdad-test-${{ github.sha }} --format='{{.State}}' || true
+            exit 1
+          fi
 
       - name: Smoke test - Home page
         run: curl -sf http://localhost:8080/ || exit 1
