@@ -1,4 +1,61 @@
 services:
+  # ─── Data Layer ───────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: crawdad-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: crawdad
+      POSTGRES_USER: crawdad
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-crawdad_secret}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    networks:
+      - crawdad-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crawdad -d crawdad"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Backend API ─────────────────────────────────────────────────────────────
+  crawdad-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: crawdad-backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=crawdad
+      - DB_USER=crawdad
+      - DB_PASSWORD=${DB_PASSWORD:-crawdad_secret}
+    networks:
+      - crawdad-internal
+      - traefik-jsq2_default
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3001/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.crawdad-api.rule=Host(`meal.clawdexter.tech`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.crawdad-api.entrypoints=websecure"
+      - "traefik.http.routers.crawdad-api.tls=true"
+      - "traefik.http.routers.crawdad-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.crawdad-api.loadbalancer.server.port=3001"
+      - "traefik.http.middlewares.crawdad-api-stripprefix.stripprefix.prefixes=/api"
+      - "traefik.http.routers.crawdad-api.middlewares=crawdad-api-stripprefix"
+
+  # ─── Frontend Web UI ─────────────────────────────────────────────────────────
   crawdad:
     build:
       context: .
@@ -8,6 +65,13 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8080
+      - API_BASE_URL=http://crawdad-backend:3001
+    networks:
+      - crawdad-internal
+      - traefik-jsq2_default
+    depends_on:
+      crawdad-backend:
+        condition: service_healthy
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.crawdad.rule=Host(`meal.clawdexter.tech`)"
@@ -15,5 +79,18 @@ services:
       - "traefik.http.routers.crawdad.tls=true"
       - "traefik.http.routers.crawdad.tls.certresolver=letsencrypt"
       - "traefik.http.services.crawdad.loadbalancer.server.port=8080"
-    ports:
-      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/ || exit 1"]
+      interval: 30s
+      timeout: 3s
+      start-period: 10s
+      retries: 3
+
+networks:
+  crawdad-internal:
+    driver: bridge
+  traefik-jsq2_default:
+    external: true
+
+volumes:
+  postgres_data:

@@ -1,0 +1,16 @@
+{
+  "name": "crawdad-backend",
+  "version": "1.0.0",
+  "description": "Crawdad Recipe API - Express + PostgreSQL",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "migrate": "node db/migrate.js",
+    "seed": "node db/seed.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "pg": "^8.16.0"
+  }
+}
