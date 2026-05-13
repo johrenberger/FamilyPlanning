@@ -29,8 +29,8 @@
   "dependencies": {
     "express": "^5.2.1",
     "express-handlebars": "^9.0.1",
-    "helmet": "^8.1.0",
-    "express-rate-limit": "^8.4.1"
+    "express-rate-limit": "^8.5.1",
+    "helmet": "^8.1.0"
   },
   "devDependencies": {
     "chai": "^5.3.3",
